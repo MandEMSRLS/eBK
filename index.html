@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ebk Detail-Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table-fixed-header thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f8fafc;
+            z-index: 10;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            border-radius: 0.375rem;
+        }
+
+        .bg-success {
+            background-color: #10B981;
+        }
+
+        .bg-danger {
+            background-color: #EF4444;
+        }
+
+        .bg-primary {
+            background-color: #3B82F6;
+        }
+
+        .bg-warning {
+            background-color: #F59E0B;
+            color: #1F2937;
+        }
+
+        /* --- Mobile Responsive Table Styles --- */
+        @media screen and (max-width: 767px) {
+            .table-container {
+                overflow-x: hidden;
+            }
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                border: 1px solid #e2e8f0;
+                border-radius: 0.5rem;
+                margin-bottom: 1rem;
+                padding: 0.5rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            td {
+                border: none !important;
+                position: relative;
+                padding-left: 50% !important;
+                text-align: left !important;
+                font-size: 0.875rem;
+                /* sm:text-sm */
+            }
+
+            td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0.5rem;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                font-weight: 600;
+                color: #4a5568;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+
+    <!-- modal to do the bulk upload -->
+    <div class="modal fade" id="uploadBulkDataModal" tabindex="-1" aria-labelledby="exampleModalLabel1"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="">Upload bulk Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <label for="BulkUploadDistrict">District:</label>
+                    <select id="BulkUploadDistrict" name="BulkUploadDistrict" class="form-control">
+                        <option value="">-- Select District --</option>
+                    </select>
+
+                    <label for="BulkUploadBlock">Block:</label>
+                    <select id="BulkUploadBlock" name="BulkUploadBlock" class="form-control" disabled>
+                        <option value="">-- Select Block --</option>
+                    </select>
+
+                    <input type="file" id="excel_file" name="updates" class="form-control mt-3" accept=".xlsx, .xls" />
+                    <input type="text" name="bulkUploadCode" id="bulkUploadCode" class="form-control mt-2"
+                        placeholder="Enter Security Code *">
+                    <button class="btn btn-info mt-3" onclick="processExcel()">Preview Data</button>
+                    <button class="btn btn-info mt-3" id="btnUploadData" onclick="uploadData()">Upload Data</button>
+                    <!-- <button class="btn btn-info mt-3" id="btnUploadData" onclick="downloadFormat()">Download
+                        Format</button> -->
+                    <div id="preview"> </div>
+                    <div id="Bulkmsg" class="text-success h2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  DISTRICT MODAL CONFIRM  -->
+    <div class="modal fade" id="ConfirmModal" tabindex="-1" aria-labelledby="ConfirmMModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">District Confirm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateForm">
+                        <div class="row">
+                            <!-- code for confirm -->
+                            <input type="text" class="form-control rounded-3" id="Mode" name="Mode" required
+                                value="D_CONFIRM" readonly style="display:none;">
+                            <!-- ID -->
+                            <input type="text" class="form-control rounded-3" id="id" name="id" required readonly
+                                style="display:none;">
+                            <!-- sheet for update (District) -->
+                            <input type="text" class="form-control rounded-3" id="ApproveSheet" name="ApproveSheet"
+                                required readonly style="display:none;">
+                            <!-- BLOCK -->
+                            <input type="text" class="form-control rounded-3" id="UpdateBlock1" name="UpdateBlock1"
+                                required readonly style="display:none;">
+                        </div>
+                        <div class="col-md-12">
+                            <span class="text-danger">Are you sure you want to confirm this record?</span> <br>
+                            <label for="SCOde" class="form-label">Security Code<b class="text-danger">*</b></label>
+                            <input type="password" class="form-control rounded-3" id="SCOde" name="SCOde" required>
+                        </div>
+                </div>
+                <button type="submit" class="bg-green-800 text-white p-2 mt-3 btn-submit rounded-3" id="updatebtn">
+                    CONFIRM </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPDATE FROM BLOCK MODAL -->
+    <div class="modal fade" id="UPDATEModal" tabindex="-1" aria-labelledby="updateModalLabel1" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateModalLabel1">Update Ebk Status and Payment Detail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="EditForm">
+                        <div class="row">
+                            <!-- code for confirm -->
+                            <input type="text" class="form-control rounded-3" id="Mode1" name="Mode" required
+                                value="B_UPLOAD" readonly style="display:none;">
+                            <!-- ID -->
+                            <input type="text" class="form-control rounded-3" id="BC_id" name="BC_id" required readonly
+                                style="display:none;">
+                            <!-- sheet for update (District) -->
+                            <input type="text" class="form-control rounded-3" id="BC_ApproveSheet"
+                                name="BC_ApproveSheet" required readonly style="display:none;">
+
+                            <!-- BLOCK -->
+                            <input type="text" class="form-control rounded-3" id="BC_UpdateBlock1"
+                                name="BC_UpdateBlock1" required readonly style="display:none;">
+
+                            <!-- UI -->
+                            <div class="col-md-3">
+                                <label for="status" class="form-label">Status<b class="text-danger">*</b></label>
+                                <select name="status" id="status" class="form-control rounded-3" required>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="payment" class="form-label">Claim received till<b
+                                        class="text-danger">*</b></label>
+                                <select name="year" id="year" class="form-control rounded-3">
+                                    <option value="2025-2026">2025-2026</option>
+                                    <option value="2024-2025">2024-2025</option>
+                                    <option value="2023-2024">2023-2024</option>
+                                    <option value="2022-2023">2022-2023</option>
+                                    <option value="2021-2022">2021-2022</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="payment" class="form-label">Months<b class="text-danger">*</b></label>
+                                <select name="payment" id="payment" class="form-control rounded-3">
+                                    <option value="-1">-- Select Option -- </option>
+                                    <option value="JAN">JAN</option>
+                                    <option value="FEB">FEB</option>
+                                    <option value="MARCH">MARCH</option>
+                                    <option value="APRIL">APRIL</option>
+                                    <option value="MAY">MAY</option>
+                                    <option value="JUNE">JUNE</option>
+                                    <option value="JULY">JULY</option>
+                                    <option value="AUG">AUG</option>
+                                    <option value="SEPT">SEPT</option>
+                                    <option value="OCT">OCT</option>
+                                    <option value="NOV">NOV</option>
+                                    <option value="DEC">DEC</option>
+                                </select>
+                                <!-- <input type="text" class="form-control rounded-3" id="payment" name="payment" required> -->
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="doTransaction" class="form-label">Do the Transaction<b
+                                        class="text-danger">*</b></label>
+                                <select name="doTransaction" id="doTransaction" class="form-control rounded-3" required>
+                                    <option value="YES">Yes</option>
+                                    <option value="NO">No</option>
+                                </select>
+                            </div>
+                            <!-- <div class="col-md-12">
+                                <label for="training" class="form-label">Training</label>
+                                <select name="training" id="training" class="form-control rounded-3">
+                                    <option value="Lokos Transaction">Lokos Transaction</option>
+                                    <option value="Bookkeeping">Bookkeeping</option>
+                                </select>
+                            </div> -->
+
+                            <div class="col-md-12 mt-3">
+                                <label>Training</label>
+                                <select name="training[]" id="training" class="form-control" multiple>
+                                    <option value="Basic Training">Basic Training</option>
+                                    <option value="Lokos Profiling">Lokos Profiling</option>
+                                    <option value="Transaction">Transaction</option>
+                                    <option value="Bookkeeping">Bookkeeping</option>
+                                    <option value="Not Received">Not Received</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="col-md-12">
+                            <label for="SCOde" class="form-label">Security Code<b class="text-danger">*</b></label>
+                            <input type="password" class="form-control rounded-3" id="SCOde" name="SCOde" required>
+                        </div>
+                        <button type="submit" class="bg-green-800 text-white p-2 mt-3 btn-submit rounded-3"
+                            id="blk_updatebtn"> UPDATE </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END MODAL -->
+
+    <!-- MAIN SECTION -->
+    <div class="bg-white p-4 md:p-8 rounded-lg shadow-xl">
+        <nav class="bg-gray-800 p-4">
+            <div class="container mx-auto flex justify-between items-center">
+                <div>
+                    <a href="#" class="text-white text-lg font-semibold">MSRLS</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="m-1 p-1"></div>
+        <!-- bulk upload btn -->
+        <button class="btn btn-info" style="float:right" id="btnOpenModalBulkUpload">Upload Bulk Data</button>
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Ebk Detail</h1>
+
+        <!-- DISTRICT SELECTION -->
+        <label for="DistrictLoaddta">District</label>
+        <select name="" class="form-control" id="DistrictLoaddta">
+            <option value="EGH">East Garo Hills</option>
+            <option value="EJH">East Jaintia Hills</option>
+            <option value="EKH">East Khasi Hills</option>
+            <option value="EWKH">Eastern West Khasi Hills</option>
+            <option value="NGH">North Garo Hills</option>
+            <option value="RB">Ri-Bhoi</option>
+            <option value="SGH">South Garo Hills</option>
+            <option value="SWGH">South West Garo Hills</option>
+            <option value="SWKH">South West Khasi Hills</option>
+            <option value="WGH">West Garo Hills</option>
+            <option value="WJH">West Jaintia Hills</option>
+            <option value="WKH">West Khasi Hills</option>
+        </select>
+        <br><br>
+
+
+        <!-- option to select  -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6 items-end">
+            <div class="col-span-full lg:col-span-2">
+                <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">Search...</label>
+                <input type="text" id="searchInput" placeholder="Search..."
+                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="blockFilter" class="block text-sm font-medium text-gray-700 mb-1">Block</label>
+                <select id="blockFilter"
+                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <option value="">Block</option>
+                </select>
+            </div>
+            <div class="flex items-end gap-4 col-span-full md:col-span-2 lg:col-span-1 justify-between md:justify-end">
+                <div>
+                    <label for="showEntries" class="block text-sm font-medium text-gray-700 mb-1">Show</label>
+                    <select id="showEntries"
+                        class="mt-1 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <button id="resetBtn"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md shadow-sm transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">
+                    Reset
+                </button>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+            <button id="downloadExcelBtn"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75">
+                Download Excel
+            </button>
+
+        </div>
+
+        <center>
+            <span class="text-success h1" id="msg"></span>
+            <span class="text-danger h1" id="errormsg"></span>
+        </center>
+
+        <div class="table-container bg-white rounded-lg overflow-hidden shadow-md overflow-x-auto">
+            <table id="meetingTable" class="min-w-full divide-y divide-gray-200 table-fixed-header">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            SL</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            District</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            Block</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            Old eBK Name</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            Old eBK ID</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            Old Roles Assigned</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            New (Meri Pahchan) eBK Name</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            New (Meri Pahchan) eBK ID</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            New (Meri Pahchan) Roles Assigned</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            eBK Mobile No.</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            KYC Status</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            SHGs</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            VOs</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            CLFs </th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            Active/Inactive</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            Do the Transaction</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            Training Received</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-4">
+                            Claim Received</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            District Confirm</th>
+                        <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                            Action</th>
+                    </tr>
+                </thead>
+                <tbody id="meetingTableBody" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="14" class="py-4 px-4 text-center text-gray-500">Loading data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between items-center mt-6 text-sm text-gray-700">
+            <div class="mb-2 md:mb-0">
+                Total Entries: <span id="totalEntries">0</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="prevBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Previous
+                </button>
+                <span id="pageInfo">Page 1 of 1</span>
+                <button id="nextBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> -->
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Bootstrap (after jQuery is fine) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            $('#training').select2({
+                placeholder: "Select Training",
+                width: '100%'
+            });
+
+
+        });
+        const dropdownToggle = document.getElementById('dropdown-toggle');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw9SNlp1U6j82IViqUJxpzmz0oylaLf5dWvouENcynFlNIuBBpOMrse_ZCUg1QL1JDE9w/exec";
+        let allMeetingData = [];
+
+        //this  variable will store the data of the district, block, gp and village 
+        let dta = [];
+
+        let filteredData = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let rawData;
+
+
+
+        // Get DOM elements
+        const meetingTableBody = document.getElementById('meetingTableBody');
+        const searchInput = document.getElementById('searchInput');
+        // filter 
+        const districtFilter = document.getElementById('DistrictFilter');
+        const blockFilter = document.getElementById('blockFilter');
+        const showEntries = document.getElementById('showEntries');
+        const resetBtn = document.getElementById('resetBtn');
+        const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const pageInfo = document.getElementById('pageInfo');
+        const totalEntriesSpan = document.getElementById('totalEntries');
+
+
+
+        // 1. Your Data Object
+        const data = {
+            "EKH": ["KHADARSHNONG-LAITKROH", "MAWKYNREW", "MAWLAI", "MAWPAT", "MAWPHLANG", "MAWRYNGKNENG", "MAWSYNRAM", "MYLLIEM", "PYNURSLA", "SHELLA BHOLAGANJ", "SOHIONG"],
+            "WGH": ["DADENGGRE", "DALU", "DEMDEMA", "GAMBEGRE", "RONGRAM", "SELSELLA", "TIKRIKILLA", "BATABARI"],
+            "RB": ["BHOIRYMBONG", "JIRANG", "UMLING", "UMSNING", "MAWHATI"],
+            "SGH": ["BAGHMARA", "CHOKPOT", "GASUAPARA", "RONGGARA", "SIJU"],
+            "WKH": ["MAWSHYNRUT", "NONGSTOIN", "RAMBRAI", "RI-MULIANG", "SHALLANG"],
+            "NGH": ["BAJENGDOBA", "KHARKUTTA", "RESUBELPARA", "ADOKGRE"],
+            "SWGH": ["BETASING", "DAMALGRE", "ZIKZAK", "PURAKHASIA"],
+            "WJH": ["AMLAREM", "LASKEIN", "THADLASKEIN", "NAMDONG"],
+            "EGH": ["DAMBO RONGJENG", "SAMANDA", "SONGSAK"],
+            "EJH": ["KHLIEHRIAT", "SAIPUNG", "LUMSHNONG"],
+            "EWKH": ["MAIRANG", "MAWTHADRAISHAN"],
+            "SWKH": ["MAWKYRWAT", "RANIKOR"]
+        };
+
+        // open modal for bulk upload
+        // do the bulk upload
+        $("#btnOpenModalBulkUpload").click(function () {
+            $('#uploadBulkDataModal').modal('show');
+            $('#Bulkmsg').text("");
+            $('#preview').html("");
+        });
+
+        //load district and block data in the dropdown for bulk upload
+        const districtSelect = document.getElementById('BulkUploadDistrict');
+        const blockSelect = document.getElementById('BulkUploadBlock');
+
+        // 2. Load Districts into the first dropdown
+        for (let district in data) {
+            let opt = document.createElement('option');
+            opt.value = district;
+            opt.innerHTML = district;
+            districtSelect.appendChild(opt);
+        }
+
+        // 3. Handle Change Event
+        districtSelect.addEventListener('change', function () {
+            const selectedDistrict = this.value;
+
+            // Clear the Block dropdown
+            blockSelect.innerHTML = '<option value="">-- Select Block --</option>';
+
+            if (selectedDistrict) {
+                // Enable the dropdown and populate it
+                blockSelect.disabled = false;
+
+                data[selectedDistrict].forEach(block => {
+                    let opt = document.createElement('option');
+                    opt.value = block;
+                    opt.innerHTML = block;
+                    blockSelect.appendChild(opt);
+                });
+            } else {
+                // Disable if no district is selected
+                blockSelect.disabled = true;
+            }
+        });
+
+        // Load data based on district selection
+        $("#DistrictLoaddta").change(function () {
+            fetchData();
+        })
+
+        //get all the data 
+        async function fetchData() {
+            try {
+
+                let nameParam = $("#DistrictLoaddta").val();
+
+                const apiUrl = `${WEB_APP_URL}?s=${encodeURIComponent(nameParam)}`;
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}. Response: ${errorText}`);
+                }
+                rawData = await response.json();
+                console.log(rawData);
+
+
+                if (rawData.message && rawData.message.length > 1) {
+                    const headers = rawData.message[0];
+                    dta = rawData.message.slice(1).map(row => {
+                        const rowObject = {};
+                        headers.forEach((header, index) => {
+                            rowObject[header] = row[index];
+                        });
+                        return rowObject;
+                    });
+
+                    allMeetingData = dta;
+                } else {
+                    dta = [];
+                    allMeetingData = [];
+                    console.warn("No data or headers found in the fetched response.");
+                }
+
+                initializeFilters();
+                applyFiltersAndSearch();
+            } catch (error) {
+                console.error("Fetch error:", error);
+                meetingTableBody.innerHTML = '<tr><td colspan="14" class="py-4 px-4 text-center text-red-500">Error loading data. Please try again.</td></tr>';
+            }
+        }
+
+        const getUniqueValues = (data, key) => [...new Set(data.map(item => item[key]).filter(Boolean))].sort();
+        const populateSelect = (selectElement, values) => {
+            selectElement.innerHTML = '<option value="">-- select option -- </option>';
+            values.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                selectElement.appendChild(option);
+            });
+        };
+
+        function initializeFilters() {
+            const allBlocks = getUniqueValues(dta, 'Block');
+            populateSelect(blockFilter, allBlocks);
+        }
+
+        blockFilter.addEventListener('change', () => {
+            const selectedBlock = blockFilter.value;
+            const filteredByBlock = dta.filter(item => item.Block === selectedBlock);
+        });
+
+        function renderTable() {
+            meetingTableBody.innerHTML = '';
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+            if (paginatedData.length === 0) {
+                const row = meetingTableBody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 14; // Updated colspan to match number of columns
+                cell.textContent = "No records found.";
+                cell.className = "py-4 px-4 text-center text-gray-500";
+                return;
+            }
+            paginatedData.forEach((item, index) => {
+                const row = meetingTableBody.insertRow();
+                row.className = 'hover:bg-gray-50'; // Add hover effect
+
+                const uid = item["ID"]; // Unique ID  U_ID
+                const slNo = startIndex + index + 1; // Serial number
+
+                const district = item["District"] || '<span class="badge bg-warning">N/A </span>';
+                const block = item["Block"] || '<span class="badge bg-warning">N/A </span>';
+
+                // Old eBK Details
+                const oldEBKName = item["Old eBK Name"] || '<span class="badge bg-warning">N/A </span>';
+                const oldEBKID = item["Old eBK ID"] || '<span class="badge bg-warning">N/A </span>';
+                const oldRoles = item["Old Roles Assigned"] || '<span class="badge bg-warning">N/A </span>';
+
+                // new ebk details
+                const newMeripahchaneBkName = item["New (Meri Pahchan) eBK Name"] || '<span class="badge bg-warning">N/A </span>';
+                const newMeripahchaneBkID = item["New (Meri Pahchan) eBK ID"] || '<span class="badge bg-warning">N/A </span>';
+                const newMeripahchaneRoles = item["New (Meri Pahchan) Roles Assigned"] || '<span class="badge bg-warning">N/A </span>';
+
+                const ebkMobileNo = item["eBK Mobile No."] || '<span class="badge bg-warning">N/A </span>';
+                const kycStatus = item["KYC Status"] || '<span class="badge bg-warning">N/A </span>';
+
+                // number of SHGs, VOs and CLFs
+                const SHGs = item["SHGs"] || '<span class="badge bg-warning">N/A </span>';
+                const VOs = item["VOs"] || '<span class="badge bg-warning">N/A </span>';
+                const CLFs = item["CLFs"] || '<span class="badge bg-warning">N/A </span>';
+
+                // Active_Inactive
+                const Active_Inactive = item["Active/Inactive"] || '<span class="badge bg-warning">N/A </span>';
+
+                const DoTransaction = item["Doing_Transaction"] || '<span class="badge bg-warning">N/A </span>';
+                const TrainingReceived = item["Training"] || '<span class="badge bg-warning">N/A </span>';
+
+                // Payment
+                const year = item["Year"] || '<span class="badge bg-warning">N/A </span>';
+                const month = item['Payment-Till'] || '<span class="badge bg-warning">N/A </span>';
+
+                // approval    
+                let districtApproved = item["D_Approved"];
+
+                if (districtApproved === 'YES') {
+                    c10 = '<span class="badge bg-success"> Confirmed </span>';
+                    c11 = `<button type="button" class="btn btn-sm btn-primary mt-1" onclick="updatefun(${uid})">Update</button>`;
+                }
+                else {
+                    c11 = `<button type="button" class="btn btn-sm btn-primary mt-1" onclick="updatefun(${uid})">Update</button>`;
+                    c10 = `<button type="button" class="btn btn-sm btn-primary mt-1" onclick="Dconfirm(${uid})">Confirm</button>`;
+                }
+
+                row.innerHTML = `
+                    <td class="py-2 px-2 whitespace-nowrap text-sm font-medium text-gray-900 w-8" data-label="SL">${slNo}</td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="District">${district}</td>
+                    <td class="py-2 px-2 whitespace-nowrap text-sm text-gray-700" data-label="Block">${block}</td>
+                    <td class="py-2 px-2 text-sm text-gray-700 w-8" data-label="OldEbkName">${oldEBKName}</td>
+                    <td class="py-2 px-2 whitespace-nowrap text-sm text-gray-700 w-8" data-label="OldEBKID">${oldEBKID}</td>
+                    <td class="py-2 px-2 whitespace-nowrap text-sm text-gray-700" data-label="OldRoles">${oldRoles}</td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="newMeripahchaanRoles">${newMeripahchaneBkName}</td>
+                    <td class="py-2 px-2 whitespace-nowrap text-sm text-gray-700" data-label="NewMeripahchaanBKID">${newMeripahchaneBkID}</td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="NewMeripahchaanRoles">${newMeripahchaneRoles}</td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="EbkMobileNo">${ebkMobileNo}</td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="KycStatus">${kycStatus}</td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="Shgs">${SHGs} </td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="Vos">${VOs} </td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="CLFs">${CLFs} </td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="Active/Inactive">${Active_Inactive} </td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="Active/Inactive"> ${DoTransaction} </td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="Active/Inactive"> ${TrainingReceived} </td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="Year_month">${year}, ${month} </td>
+                    <td class="py-2 px-2 text-sm text-gray-700" data-label="DistrictApproved"> ${districtApproved}  </td> 
+                    <td>  ${c10}  <br> ${c11} </td> `;
+            });
+
+            updatePaginationInfo();
+        }
+
+        function applyFiltersAndSearch() {
+
+            let data = [...allMeetingData];
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const selectedblock = blockFilter.value;
+            if (searchTerm) {
+                data = data.filter(item =>
+                    Object.values(item).some(value =>
+                        String(value).toLowerCase().includes(searchTerm)
+                    )
+                );
+            }
+
+            if (selectedblock) {
+                data = data.filter(item => item["Block"] === selectedblock);
+            }
+
+            filteredData = data;
+            currentPage = 1;
+            renderTable();
+        }
+
+        function updatePaginationInfo() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages || 1}`;
+            totalEntriesSpan.textContent = filteredData.length;
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // Search input
+        searchInput.addEventListener('keyup', applyFiltersAndSearch);
+        blockFilter.addEventListener('change', applyFiltersAndSearch);
+
+        showEntries.addEventListener('change', (event) => {
+            itemsPerPage = parseInt(event.target.value, 10);
+            applyFiltersAndSearch();
+        });
+
+        // Reset button
+        resetBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            districtFilter.value = '';
+            blockFilter.value = '';
+            showEntries.value = '10';
+            itemsPerPage = 10;
+            applyFiltersAndSearch();
+        });
+
+        // Pagination buttons
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        });
+
+        // Download excel
+        downloadExcelBtn.addEventListener('click', () => {
+            if (filteredData.length === 0) {
+                alert("No data to export!");
+                return;
+            }
+
+            // Header Set_up for excell							
+            const exportHeaders = [
+                "#Sl.No", "ID", "District", "Block", "Old eBK Name", "Old eBK ID", "Old Roles Assigned", "New (Meri Pahchan) eBK Name", "New (Meri Pahchan) eBK ID", "New (Meri Pahchan) Roles Assigned", "eBK Mobile No.", "KYC Status", "SHGs", "VOs", "CLFs", "Active/Inactive", "Do the Transaction", "Training Received", "Year", "Month", "District Confirm"
+            ];
+
+            const exportData = filteredData.map((item, index) => {
+                const row = {};
+                row["#Sl.No"] = index + 1;
+                row["ID"] = item["ID"];
+                row["District"] = item["District"];
+                row["Block"] = item["Block"];
+                row["Old eBK Name"] = item["GP"];
+                row["Old eBK ID"] = item["Old eBK ID"];
+                row["Old Roles Assigned"] = item["Old Roles Assigned"];
+                row["New (Meri Pahchan) eBK Name"] = item["New eBK Name"];
+                row["New (Meri Pahchan) eBK ID"] = item["New eBK ID"];
+                row["New (Meri Pahchan) Roles Assigned"] = item["New Roles Assigned"];
+                row["eBK Mobile No."] = item["eBK Mobile No."];
+                row["KYC Status"] = item["KYC Status"];
+                row["SHGs"] = item["SHGs"];
+                row["VOs"] = item["VOs"];
+                row["CLFs"] = item["CLFs"];
+                row["Active/Inactive"] = item["Active/Inactive"];
+                row["Do the Transaction"] = item["Doing_Transaction"];
+                row["Training Received"] = item["Training"];
+                row["Year"] = item["Year"];
+                row["Month"] = item["Payment-Till"];
+                row["District Confirm"] = item["D_Approved"];
+                return row;
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData, { header: exportHeaders });
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Ebk Detail");
+            XLSX.writeFile(workbook, "Ebk Report.xlsx");
+        });
+
+        // CONFIRM FUNCTION
+        function Dconfirm(id) {
+            console.log("Confirm function called for ID:", id);
+            const rowData = filteredData.find(item => item["ID"] === id);
+            if (rowData) {
+                $('#ConfirmModal').modal('show');
+
+                //District
+                $("#ApproveSheet").val($("#DistrictLoaddta").val())
+                document.getElementById('UpdateBlock1').value = rowData["Block"]; //block
+                document.getElementById('id').value = id;
+            } else {
+                console.log("No data found for the given ID.");
+            }
+        }
+
+        //Edit data from block
+        function updatefun(uid) {
+            const rowData = filteredData.find(item => item["ID"] === uid);
+            if (rowData) {
+                $('#UPDATEModal').modal('show');
+                $("#BC_ApproveSheet").val($("#DistrictLoaddta").val())
+                document.getElementById('BC_id').value = rowData['ID'];
+                document.getElementById('BC_UpdateBlock1').value = rowData["Block"];
+            } else {
+                console.log("No data found for the given UID.");
+            }
+        }
+
+        // ################# APPROVE FROM District
+        const submissionForm = document.getElementById('updateForm');
+        submissionForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(submissionForm);
+            try {
+                $("#updatebtn").attr("disabled", true);
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log("Response status:", response.status);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}. Response: ${errorText}`);
+                }
+                const result = await response.json();
+                if (result.success) {
+                    submissionForm.reset();
+                    // $('#ConfirmModal').modal('hide');
+                    // $('#msg').text("Sucessfully Confirm");
+                    alert("Sucessfull Confirm");
+                    fetchData();
+
+                } else {
+                    submissionForm.reset();
+                    alert("Failed to confirm data. Please Check the Code");
+                    fetchData();
+
+                    // $('#ConfirmModal').modal('hide');
+                    // $('#msg').css('color', 'red');  //with ID
+                    // $('#msg').text("Failed to Confirm  Data.");
+                }
+            } catch (error) {
+                alert("Some Error occur. Please check the code.")
+                $('#ConfirmModal').modal('hide');
+                $('#errormsg').text("Failed to Confirm  Data.");
+            }
+        });
+
+        // UPDATE FROM BLOCK
+        const EditForm = document.getElementById('EditForm');
+        EditForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent the default form submission
+            const formData = new FormData(EditForm);
+            const trainingValues = formData.getAll("training[]");
+            formData.set("training", trainingValues.join(", "));
+            try {
+                //  <!-- Mode, id, ApproveSheet, UpdateBlock1, status, payment,  training,  SCOde -->
+                $("#blk_updatebtn").attr("disabled", true);
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}. Response: ${errorText}`);
+                }
+                const result = await response.json();
+                if (result.success) {
+                    EditForm.reset();
+                    await fetchData();
+                    $('#UPDATEModal').modal('hide');
+                    alert("Sucessfully Updated");
+
+                } else {
+                    $('#UPDATEModal').modal('hide');
+                    await fetchData();
+                    alert("Failed to update the data. please check the code.")
+                    // fetchData();
+                }
+            } catch (error) {
+                alert("Some error occur.")
+                $('#UPDATEModal').modal('hide');
+                // $('#errormsg').text("Failed to Update Data.");
+            }
+        });
+
+
+        // ################### DO THE BULK UPLOAD
+
+        function processExcel() {
+            const fileInput = document.getElementById('excel_file');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select an Excel file first!");
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const rawJson = XLSX.utils.sheet_to_json(worksheet);
+
+                console.log("Raw JSON from Excel:", rawJson);
+
+                const formattedData = rawJson.map(row => {
+                    return {
+                        id: row['ID'],
+                        Active_IN: row['Active/Inactive'],
+                        Dothetransaction: row['Do the Transaction'],
+                        trainingReceived: row['Training Received'],
+                        year: row['Year'],
+                        PaymentTill: row['Month']
+                    };
+                });
+                displayPreview(formattedData);
+                window.bulkDataToUpload = formattedData;
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function displayPreview(data) {
+            console.log(data)
+            const preview = document.getElementById('preview');
+            preview.innerHTML = `<h4>Found ${data.length} records. Ready to update.</h4>`;
+        }
+
+        //function to upload to file
+        function uploadData() {
+            te();
+        }
+
+        async function te() {
+            if (!window.bulkDataToUpload) return alert("No data to upload");
+
+            if ($("#bulkUploadCode").val().trim() === "") {
+                alert("Please enter Bulk Upload Code");
+                return;
+            }
+
+            $("#btnUploadData").attr("disabled", true);
+
+            $('#Bulkmsg').text("Please wait...Uploading data");
+
+            const payload = {
+
+                // BulkUploadDistrict, BulkUploadBlock, bulkUploadCode
+
+                bulkCode: $("#bulkUploadCode").val(), // Bulk upload code")
+                Block1: $("#BulkUploadBlock").val(), // Bulk upload code")
+                District1: $("#BulkUploadDistrict").val(), // Bulk upload code")
+                Mode: "UPDATE_BULK",  // mode
+                updates: window.bulkDataToUpload // data to Update
+            };
+
+            console.log("Payload to send:", payload);
+
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbybuuNGSEFQ7dOzUzp5vvkIJnilWpdqpqczfvQy2wy08DrpsmYWqn78SbKC5zwuoyT6CA/exec', {
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+
+                const text = await response.text(); // Get raw text first to avoid the SyntaxError
+                try {
+                    const data = JSON.parse(text);
+                    console.log("Success:", data);
+                } catch (e) {
+                    console.error("The Server returned an invalid response:", text);
+                    alert("Server Error: Check Google Script Logs");
+                }
+                //const result = await response.json();
+                $('#Bulkmsg').text(result.message);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        // Initial setup on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData(); // Start fetching data immediately
+        });
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</body>
+
+</html>
