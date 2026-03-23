@@ -914,13 +914,15 @@
                 const result = await response.json();
                 if (result.success) {
                     EditForm.reset();
-                    await fetchData();
+                    location.reload();
+                    // await fetchData();
                     $('#UPDATEModal').modal('hide');
                     alert("Sucessfully Updated");
 
                 } else {
                     $('#UPDATEModal').modal('hide');
-                    await fetchData();
+                    location.reload();
+                    // await fetchData();
                     alert("Failed to update the data. please check the code.")
                     // fetchData();
                 }
