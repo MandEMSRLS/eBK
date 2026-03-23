@@ -141,8 +141,6 @@
                         placeholder="Enter Security Code *">
                     <button class="btn btn-info mt-3" onclick="processExcel()">Preview Data</button>
                     <button class="btn btn-info mt-3" id="btnUploadData" onclick="uploadData()">Upload Data</button>
-                    <!-- <button class="btn btn-info mt-3" id="btnUploadData" onclick="downloadFormat()">Download
-                        Format</button> -->
                     <div id="preview"> </div>
                     <div id="Bulkmsg" class="text-success h2"></div>
                 </div>
@@ -447,25 +445,26 @@
 
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> -->
     <!-- Select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> -->
     <!-- Bootstrap (after jQuery is fine) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 
     <script>
 
-        $(document).ready(function () {
+        // $(document).ready(function () {
 
-            $('#training').select2({
-                placeholder: "Select Training",
-                width: '100%'
-            });
+        // $('#training').select2({
+        //     placeholder: "Select Training",
+        //     width: '100%'
+        // });
 
 
-        });
+        // });
         const dropdownToggle = document.getElementById('dropdown-toggle');
         const dropdownMenu = document.getElementById('dropdown-menu');
 
@@ -565,9 +564,7 @@
         //get all the data 
         async function fetchData() {
             try {
-
                 let nameParam = $("#DistrictLoaddta").val();
-
                 const apiUrl = `${WEB_APP_URL}?s=${encodeURIComponent(nameParam)}`;
                 const response = await fetch(apiUrl);
                 if (!response.ok) {
@@ -575,8 +572,7 @@
                     throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}. Response: ${errorText}`);
                 }
                 rawData = await response.json();
-                console.log(rawData);
-
+                // console.log(rawData);
 
                 if (rawData.message && rawData.message.length > 1) {
                     const headers = rawData.message[0];
@@ -714,7 +710,6 @@
         }
 
         function applyFiltersAndSearch() {
-
             let data = [...allMeetingData];
             const searchTerm = searchInput.value.toLowerCase().trim();
             const selectedblock = blockFilter.value;
@@ -863,7 +858,7 @@
                     body: formData
                 });
 
-                console.log("Response status:", response.status);
+                // console.log("Response status:", response.status);
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}. Response: ${errorText}`);
@@ -935,7 +930,6 @@
 
 
         // ################### DO THE BULK UPLOAD
-
         function processExcel() {
             const fileInput = document.getElementById('excel_file');
             const file = fileInput.files[0];
@@ -954,8 +948,6 @@
                 const worksheet = workbook.Sheets[firstSheetName];
                 const rawJson = XLSX.utils.sheet_to_json(worksheet);
 
-                console.log("Raw JSON from Excel:", rawJson);
-
                 const formattedData = rawJson.map(row => {
                     return {
                         id: row['ID'],
@@ -973,8 +965,8 @@
             reader.readAsArrayBuffer(file);
         }
 
+
         function displayPreview(data) {
-            console.log(data)
             const preview = document.getElementById('preview');
             preview.innerHTML = `<h4>Found ${data.length} records. Ready to update.</h4>`;
         }
@@ -984,55 +976,259 @@
             te();
         }
 
-        async function te() {
-            if (!window.bulkDataToUpload) return alert("No data to upload");
+        // async function te() {
 
-            if ($("#bulkUploadCode").val().trim() === "") {
+        //     if (!window.bulkDataToUpload || window.bulkDataToUpload.length === 0) {
+        //         return alert("No data to upload");
+        //     }
+
+        //     const bulkUploadCode = $("#bulkUploadCode").val().trim();
+        //     if (bulkUploadCode === "") {
+        //         alert("Please enter Bulk Upload Code");
+        //         return;
+        //     }
+
+        //     const payload = {
+        //         bulkCode: bulkUploadCode,
+        //         Block1: $("#BulkUploadBlock").val(),
+        //         District1: $("#BulkUploadDistrict").val(),
+        //         Mode: "UPDATE_BULK",
+        //         updates: window.bulkDataToUpload
+        //     };
+
+        //     console.log(payload);
+
+        //     $("#btnUploadData").attr("disabled", true);
+        //     $('#Bulkmsg').text("Uploading data...");
+
+        //     try {
+        //         const URL = "https://script.google.com/macros/s/AKfycbwaOLqGut1mme_NTlANkBz2pD15VOeCJ_BfQB6neokkIWoVf6U_xAPJgEaFlD61aAYY-A/exec";
+
+        //         await fetch(URL, {
+        //             method: 'POST',
+        //             mode: 'no-cors',  // ✅ keep this
+        //             body: JSON.stringify(payload)
+        //         });
+
+        //         // ✅ Since no response available, assume success
+        //         $('#Bulkmsg')
+        //             .removeClass('text-danger')
+        //             .addClass('text-success')
+        //             .text("Upload successful ✅");
+
+        //         // Optional refresh
+        //         if (typeof fetchData === "function") {
+        //             await fetchData();
+        //         }
+
+        //     } catch (error) {
+        //         console.error("Submission Error:", error);
+
+        //         $('#Bulkmsg')
+        //             .removeClass('text-success')
+        //             .addClass('text-danger')
+        //             .text("Upload failed ❌");
+
+        //     }
+
+        //     $("#btnUploadData").attr("disabled", false);
+        // }
+
+
+        async function te() {
+
+            if (!window.bulkDataToUpload || window.bulkDataToUpload.length === 0) {
+                return alert("No data to upload");
+            }
+
+            const bulkUploadCode = $("#bulkUploadCode").val().trim();
+            if (bulkUploadCode === "") {
                 alert("Please enter Bulk Upload Code");
                 return;
             }
 
             $("#btnUploadData").attr("disabled", true);
-
-            $('#Bulkmsg').text("Please wait...Uploading data");
-
-            const payload = {
-
-                // BulkUploadDistrict, BulkUploadBlock, bulkUploadCode
-
-                bulkCode: $("#bulkUploadCode").val(), // Bulk upload code")
-                Block1: $("#BulkUploadBlock").val(), // Bulk upload code")
-                District1: $("#BulkUploadDistrict").val(), // Bulk upload code")
-                Mode: "UPDATE_BULK",  // mode
-                updates: window.bulkDataToUpload // data to Update
-            };
-
-            console.log("Payload to send:", payload);
+            $('#Bulkmsg').text("Uploading...");
 
             try {
-                const response = await fetch('https://script.google.com/macros/s/AKfycbybuuNGSEFQ7dOzUzp5vvkIJnilWpdqpqczfvQy2wy08DrpsmYWqn78SbKC5zwuoyT6CA/exec', {
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                const URL = "https://script.google.com/macros/s/AKfycbxnc8i1lYNB1Vd2PgVE7djKqiW-qi_5dkUSOd_eI4sFn79bYWpap4mZXTFC6bVo5lR-og/exec";
+
+                // ✅ USE FORMDATA (same as your working APIs)
+                const formData = new FormData();
+
+                console.log($("#BulkUploadBlock").val());
+                console.log($("#BulkUploadDistrict").val());
+
+                formData.append("bulkCode", bulkUploadCode);
+                formData.append("Block1", $("#BulkUploadBlock").val());
+                formData.append("District1", $("#BulkUploadDistrict").val());
+                formData.append("Mode", "UPDATE_BULK");
+
+                // 👇 IMPORTANT: send array as string
+                formData.append("updates", JSON.stringify(window.bulkDataToUpload));
+
+                const response = await fetch(URL, {
                     method: 'POST',
-                    body: JSON.stringify(payload)
+                    body: formData
                 });
 
+                const result = await response.json();
 
-                const text = await response.text(); // Get raw text first to avoid the SyntaxError
-                try {
-                    const data = JSON.parse(text);
-                    console.log("Success:", data);
-                } catch (e) {
-                    console.error("The Server returned an invalid response:", text);
-                    alert("Server Error: Check Google Script Logs");
+                console.log(result);
+
+                if (result.status === "success") {
+                    $('#Bulkmsg')
+                        .removeClass('text-danger')
+                        .addClass('text-success')
+                        .text(result.message);
+
+                    // refresh table
+                    if (typeof fetchData === "function") {
+                        await fetchData();
+                    }
+
+                } else {
+                    throw new Error(result.message || "Upload failed");
                 }
-                //const result = await response.json();
-                $('#Bulkmsg').text(result.message);
+
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error(error);
+
+                $('#Bulkmsg')
+                    .removeClass('text-success')
+                    .addClass('text-danger')
+                    .text(error.message);
             }
+
+            $("#btnUploadData").attr("disabled", false);
         }
+        // async function te() {
+        //     if (!window.bulkDataToUpload || window.bulkDataToUpload.length === 0) {
+        //         return alert("No data to upload");
+        //     }
+
+        //     const bulkUploadCode = $("#bulkUploadCode").val().trim();
+        //     if (bulkUploadCode === "") {
+        //         alert("Please enter Bulk Upload Code");
+        //         return;
+        //     }
+
+        //     // 1. Prepare the Payload
+        //     const payload = {
+        //         bulkCode: bulkUploadCode,
+        //         Block1: $("#BulkUploadBlock").val(),
+        //         District1: $("#BulkUploadDistrict").val(),
+        //         Mode: "UPDATE_BULK",
+        //         updates: window.bulkDataToUpload 
+        //     };
+
+
+        //     console.log(payload);
+        //     // UI Updates
+        //     $("#btnUploadData").attr("disabled", true);
+        //     $('#Bulkmsg').text("Please wait... Uploading data to Google Sheets");
+
+        //     try {
+        //         // 2. The Fetch Call
+        //        const URL="https://script.google.com/macros/s/AKfycbwaOLqGut1mme_NTlANkBz2pD15VOeCJ_BfQB6neokkIWoVf6U_xAPJgEaFlD61aAYY-A/exec";
+        //         const response = await fetch(URL, {
+        //             method: 'POST',
+        //             mode: 'no-cors', 
+        //             body: JSON.stringify(payload)
+        //         });
+
+        //         const result = await response.json();
+
+        //         console.log(result);
+
+        //         if (result.status === "success") {
+        //             $('#Bulkmsg').removeClass('text-danger').addClass('text-success').text("Success: " + result.message);
+
+        //             if (typeof fetchData === "function") {
+        //                 await fetchData();
+        //                 console.log("Table data refreshed automatically.");
+        //             }
+
+        //             setTimeout(() => {
+        //                 $('#UPDATEModal').modal('hide');
+        //                 $("#btnUploadData").attr("disabled", false);
+        //             }, 2000);
+
+        //         } else {
+        //             throw new Error(result.message);
+        //         }
+
+        //     } catch (error) {
+        //         console.error("Submission Error:", error);
+        //         $('#Bulkmsg').removeClass('text-success').addClass('text-danger').text("Error: " + error.message);
+        //         $("#btnUploadData").attr("disabled", false);
+
+        //         if (window.location.protocol === 'file:') {
+        //             alert("Security Error: You cannot run this by double-clicking the HTML file. Please use VS Code 'Live Server'.");
+        //         }
+        //     }
+        // }
+
+        // async function te() {
+        //     if (!window.bulkDataToUpload) return alert("No data to upload");
+
+        //     if ($("#bulkUploadCode").val().trim() === "") {
+        //         alert("Please enter Bulk Upload Code");
+        //         return;
+        //     }
+
+        //     $("#btnUploadData").attr("disabled", true);
+
+        //     $('#Bulkmsg').text("Please wait...Uploading data");
+
+        //     const payload = {
+        //         bulkCode: $("#bulkUploadCode").val(), // Bulk upload code")
+        //         Block1: $("#BulkUploadBlock").val(), // Bulk upload code")
+        //         District1: $("#BulkUploadDistrict").val(), // Bulk upload code")
+        //         Mode: "UPDATE_BULK",  // mode
+        //         updates: window.bulkDataToUpload // data to Update
+        //     };
+
+        //     console.log("Payload to send ytetetete:", payload);
+
+        //     try {
+        //         const response = await fetch('https://script.google.com/macros/s/AKfycbybuuNGSEFQ7dOzUzp5vvkIJnilWpdqpqczfvQy2wy08DrpsmYWqn78SbKC5zwuoyT6CA/exec', {
+        //             method: 'POST',
+        //             body: JSON.stringify(payload)
+        //         });
+
+        //         const result = await response.json();
+
+        //         // console.log("Success! Return data:", result.message);
+        //         $('#Bulkmsg').text(result.message);
+        //     } catch (error) {
+        //         console.error("Error fetching data:", error);
+        //     }
+
+
+        //     // try {
+        //     //     const response = await fetch('https://script.google.com/macros/s/AKfycbybuuNGSEFQ7dOzUzp5vvkIJnilWpdqpqczfvQy2wy08DrpsmYWqn78SbKC5zwuoyT6CA/exec', {
+        //     //         // headers: {
+        //     //         //     "Content-Type": "application/json"
+        //     //         // },
+        //     //         method: 'POST',
+        //     //         body: JSON.stringify(payload)
+        //     //     });
+
+        //     //     const text = await response.text(); // Get raw text first to avoid the SyntaxError
+        //     //     try {
+        //     //         const data = JSON.parse(text);
+        //     //         console.log("Success:", data);
+        //     //     } catch (e) {
+        //     //         console.error("The Server returned an invalid response:", text);
+        //     //         alert("Server Error: Check Google Script Logs");
+        //     //     }
+        //     //     //const result = await response.json();
+        //     //     $('#Bulkmsg').text(result.message);
+        //     // } catch (error) {
+        //     //     console.error("Error fetching data:", error);
+        //     // }
+        // }
 
         // Initial setup on page load
         document.addEventListener('DOMContentLoaded', () => {
