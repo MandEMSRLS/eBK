@@ -794,9 +794,9 @@
                 row["Old eBK Name"] = item["Old eBK Name"];
                 row["Old eBK ID"] = item["Old eBK ID"];
                 row["Old Roles Assigned"] = item["Old Roles Assigned"];
-                row["New (Meri Pahchan) eBK Name"] = item["New eBK Name"];
-                row["New (Meri Pahchan) eBK ID"] = item["New eBK ID"];
-                row["New (Meri Pahchan) Roles Assigned"] = item["New Roles Assigned"];
+                row["New (Meri Pahchan) eBK Name"] = item["New (Meri Pahchan) eBK Name"];
+                row["New (Meri Pahchan) eBK ID"] = item["New (Meri Pahchan) eBK ID"];
+                row["New (Meri Pahchan) Roles Assigned"] = item["New (Meri Pahchan) Roles Assigned"];
                 row["eBK Mobile No."] = item["eBK Mobile No."];
                 row["KYC Status"] = item["KYC Status"];
                 row["SHGs"] = item["SHGs"];
@@ -975,65 +975,6 @@
         function uploadData() {
             te();
         }
-
-        // async function te() {
-
-        //     if (!window.bulkDataToUpload || window.bulkDataToUpload.length === 0) {
-        //         return alert("No data to upload");
-        //     }
-
-        //     const bulkUploadCode = $("#bulkUploadCode").val().trim();
-        //     if (bulkUploadCode === "") {
-        //         alert("Please enter Bulk Upload Code");
-        //         return;
-        //     }
-
-        //     const payload = {
-        //         bulkCode: bulkUploadCode,
-        //         Block1: $("#BulkUploadBlock").val(),
-        //         District1: $("#BulkUploadDistrict").val(),
-        //         Mode: "UPDATE_BULK",
-        //         updates: window.bulkDataToUpload
-        //     };
-
-        //     console.log(payload);
-
-        //     $("#btnUploadData").attr("disabled", true);
-        //     $('#Bulkmsg').text("Uploading data...");
-
-        //     try {
-        //         const URL = "https://script.google.com/macros/s/AKfycbwaOLqGut1mme_NTlANkBz2pD15VOeCJ_BfQB6neokkIWoVf6U_xAPJgEaFlD61aAYY-A/exec";
-
-        //         await fetch(URL, {
-        //             method: 'POST',
-        //             mode: 'no-cors',  // ✅ keep this
-        //             body: JSON.stringify(payload)
-        //         });
-
-        //         // ✅ Since no response available, assume success
-        //         $('#Bulkmsg')
-        //             .removeClass('text-danger')
-        //             .addClass('text-success')
-        //             .text("Upload successful ✅");
-
-        //         // Optional refresh
-        //         if (typeof fetchData === "function") {
-        //             await fetchData();
-        //         }
-
-        //     } catch (error) {
-        //         console.error("Submission Error:", error);
-
-        //         $('#Bulkmsg')
-        //             .removeClass('text-success')
-        //             .addClass('text-danger')
-        //             .text("Upload failed ❌");
-
-        //     }
-
-        //     $("#btnUploadData").attr("disabled", false);
-        // }
-
 
         async function te() {
 
