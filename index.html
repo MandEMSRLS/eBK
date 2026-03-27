@@ -13,102 +13,197 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: "Inter", sans-serif;
-        }
+        /* ===== IMPROVED TABLE UI ===== */
 
+        /* NAVBAR */
+.gov-nav {
+    background: linear-gradient(90deg, #0f172a, #1e3a8a);
+    padding: 12px;
+    border-bottom: 4px solid #facc15;
+}
+
+/* TITLE */
+.page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* FILTER BOX */
+.gov-filter-box {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #1e3a8a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* LABEL */
+.gov-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* INPUT */
+.gov-input {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 13px;
+}
+
+.gov-input:focus {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 2px rgba(30,58,138,0.15);
+    outline: none;
+}
+
+/* BUTTONS */
+.gov-btn {
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+.gov-reset-btn {
+    background: #475569;
+    color: white;
+    padding: 7px;
+    border-radius: 6px;
+    border: none;
+}
+
+.gov-reset-btn:hover {
+    background: #334155;
+}
+
+/* DOWNLOAD */
+.gov-download-btn {
+    background: #16a34a;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+}
+
+.gov-download-btn:hover {
+    background: #15803d;
+}
+
+
+        /* SCROLL CONTAINER */
         .table-container {
+            max-height: 520px;
+            overflow-y: auto;
             overflow-x: auto;
+            position: relative;
         }
 
-        .table-fixed-header thead th {
+        /* TABLE */
+        #meetingTable {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        /* FREEZE HEADER */
+        #meetingTable thead th {
             position: sticky;
             top: 0;
-            background-color: #f8fafc;
-            z-index: 10;
+            z-index: 100;
+            background: #f1f5f9;
+            /* MUST have background */
+            border-bottom: 2px solid #d1d5db;
         }
 
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            line-height: 1;
-            color: #fff;
-            text-align: center;
-            white-space: nowrap;
+        /* EXTRA: KEEP HEADER ABOVE CONTENT */
+        #meetingTable thead {
+            position: sticky;
+            top: 0;
+            z-index: 101;
+        }
+
+
+
+        /* BODY CELLS */
+        #meetingTable tbody td {
+            padding: 8px;
+            border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
-            border-radius: 0.375rem;
+        }
+
+        /* ROW STYLE */
+        #meetingTable tbody tr {
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* ALTERNATE ROW */
+        #meetingTable tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        /* HOVER EFFECT */
+        #meetingTable tbody tr:hover {
+            background-color: #e0ecff;
+            transform: scale(1.002);
+        }
+
+        /* BADGES IMPROVED */
+        .badge {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 6px;
+            font-weight: 600;
         }
 
         .bg-success {
-            background-color: #10B981;
+            background-color: #16a34a !important;
         }
 
         .bg-danger {
-            background-color: #EF4444;
-        }
-
-        .bg-primary {
-            background-color: #3B82F6;
+            background-color: #dc2626 !important;
         }
 
         .bg-warning {
-            background-color: #F59E0B;
-            color: #1F2937;
+            background-color: #facc15 !important;
+            color: #111827 !important;
         }
 
-        /* --- Mobile Responsive Table Styles --- */
-        @media screen and (max-width: 767px) {
-            .table-container {
-                overflow-x: hidden;
-            }
+        .bg-primary {
+            background-color: #2563eb !important;
+        }
 
-            table,
-            thead,
-            tbody,
-            th,
-            td,
-            tr {
-                display: block;
-            }
+        /* ACTION BUTTON */
+        .btn-sm {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
 
-            thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
+        /* SCROLLBAR (optional but nice) */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
 
-            tr {
-                border: 1px solid #e2e8f0;
-                border-radius: 0.5rem;
-                margin-bottom: 1rem;
-                padding: 0.5rem;
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
 
-            td {
-                border: none !important;
-                position: relative;
-                padding-left: 50% !important;
-                text-align: left !important;
-                font-size: 0.875rem;
-                /* sm:text-sm */
-            }
+        /* FIX COLUMN WIDTH WRAPPING */
+        td {
+            white-space: nowrap;
+        }
 
-            td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 0.5rem;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                font-weight: 600;
-                color: #4a5568;
-            }
+        /* ALLOW LONG TEXT TO WRAP ONLY WHERE NEEDED */
+        td:nth-child(4),
+        td:nth-child(7),
+        td:nth-child(9) {
+            white-space: normal;
         }
     </style>
 </head>
@@ -221,7 +316,7 @@
                             <div class="col-md-3">
                                 <label for="payment" class="form-label">Claim received till<b
                                         class="text-danger">*</b></label>
-                                <select name="year" id="year" class="form-control rounded-3" required>
+                                <select name="year" id="year" class="form-control rounded-3">
                                     <option value="2025-2026">2025-2026</option>
                                     <option value="2024-2025">2024-2025</option>
                                     <option value="2023-2024">2023-2024</option>
@@ -232,8 +327,8 @@
 
                             <div class="col-md-3">
                                 <label for="payment" class="form-label">Months<b class="text-danger">*</b></label>
-                                <select name="payment" id="payment" class="form-control rounded-3" required>
-                                    <!-- <option value="-1">-- Select Option -- </option> -->
+                                <select name="payment" id="payment" class="form-control rounded-3">
+                                    <option value="-1">-- Select Option -- </option>
                                     <option value="JAN">JAN</option>
                                     <option value="FEB">FEB</option>
                                     <option value="MARCH">MARCH</option>
@@ -293,85 +388,115 @@
 
     <!-- MAIN SECTION -->
     <div class="bg-white p-4 md:p-8 rounded-lg shadow-xl">
-        <nav class="bg-gray-800 p-4">
+
+        <!-- GOV HEADER -->
+        <nav class="gov-nav">
             <div class="container mx-auto flex justify-between items-center">
-                <div>
-                    <a href="#" class="text-white text-lg font-semibold">MSRLS</a>
+                <div class="flex items-center gap-3">
+                    <img src="logo.png"
+                        width="40">
+                    <div>
+                        <div class="text-white font-semibold text-lg">MSRLS</div>
+                        <small class="text-gray-200">Livelihood Service Centres MIS</small>
+                    </div>
+                </div>
+                <div class="text-right text-gray-200 text-sm">
+                    Government of Meghalaya<br>
+                    <!-- <span class="text-warning">Authorized Access Only</span> -->
                 </div>
             </div>
         </nav>
 
-        <div class="m-1 p-1"></div>
-        <!-- bulk upload btn -->
-        <button class="btn btn-info" style="float:right" id="btnOpenModalBulkUpload">Upload Bulk Data</button>
-        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Ebk Detail</h1>
+        <div class="m-2"></div>
 
-        <!-- DISTRICT SELECTION -->
-        <label for="DistrictLoaddta">District</label>
-        <select name="" class="form-control" id="DistrictLoaddta">
-            <option value="EGH">East Garo Hills</option>
-            <option value="EJH">East Jaintia Hills</option>
-            <option value="EKH">East Khasi Hills</option>
-            <option value="EWKH">Eastern West Khasi Hills</option>
-            <option value="NGH">North Garo Hills</option>
-            <option value="RB">Ri-Bhoi</option>
-            <option value="SGH">South Garo Hills</option>
-            <option value="SWGH">South West Garo Hills</option>
-            <option value="SWKH">South West Khasi Hills</option>
-            <option value="WGH">West Garo Hills</option>
-            <option value="WJH">West Jaintia Hills</option>
-            <option value="WKH">West Khasi Hills</option>
-        </select>
-        <br><br>
+        <!-- TOP BAR -->
+        <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
+            <h1 class="page-title">eBookKeeper Report</h1>
 
+            <button class="btn btn-info gov-btn" id="btnOpenModalBulkUpload">
+                ⬆ Upload Bulk Data
+            </button>
+        </div>
 
-        <!-- option to select  -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6 items-end">
-            <div class="col-span-full lg:col-span-2">
-                <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">Search...</label>
-                <input type="text" id="searchInput" placeholder="Search..."
-                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-            </div>
-            <div>
-                <label for="blockFilter" class="block text-sm font-medium text-gray-700 mb-1">Block</label>
-                <select id="blockFilter"
-                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    <option value="">Block</option>
+        <!-- FILTER SECTION -->
+        <div class="gov-filter-box">
+
+            <!-- DISTRICT -->
+            <div class="mb-3">
+                <label for="DistrictLoaddta" class="gov-label">District</label>
+                <select class="form-control gov-input" id="DistrictLoaddta">
+                    <option value="EGH">East Garo Hills</option>
+                    <option value="EJH">East Jaintia Hills</option>
+                    <option value="EKH">East Khasi Hills</option>
+                    <option value="EWKH">Eastern West Khasi Hills</option>
+                    <option value="NGH">North Garo Hills</option>
+                    <option value="RB">Ri-Bhoi</option>
+                    <option value="SGH">South Garo Hills</option>
+                    <option value="SWGH">South West Garo Hills</option>
+                    <option value="SWKH">South West Khasi Hills</option>
+                    <option value="WGH">West Garo Hills</option>
+                    <option value="WJH">West Jaintia Hills</option>
+                    <option value="WKH">West Khasi Hills</option>
                 </select>
             </div>
-            <div class="flex items-end gap-4 col-span-full md:col-span-2 lg:col-span-1 justify-between md:justify-end">
+
+            <!-- FILTER GRID -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+
+                <!-- SEARCH -->
+                <div class="col-span-full lg:col-span-2">
+                    <label for="searchInput" class="gov-label">Search Records</label>
+                    <input type="text" id="searchInput" placeholder="Type to search..." class="gov-input w-full">
+                </div>
+
+                <!-- BLOCK -->
                 <div>
-                    <label for="showEntries" class="block text-sm font-medium text-gray-700 mb-1">Show</label>
-                    <select id="showEntries"
-                        class="mt-1 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <label for="blockFilter" class="gov-label">Block</label>
+                    <select id="blockFilter" class="gov-input w-full">
+                        <option value="">All Blocks</option>
+                    </select>
+                </div>
+
+                <!-- SHOW -->
+                <div>
+                    <label for="showEntries" class="gov-label">Show Entries</label>
+                    <select id="showEntries" class="gov-input">
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                         <option value="100">100</option>
                     </select>
                 </div>
-                <button id="resetBtn"
-                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md shadow-sm transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">
-                    Reset
-                </button>
+
+                <!-- RESET -->
+                <div class="flex items-end">
+                    <button id="resetBtn" class="gov-reset-btn w-full">
+                        Reset
+                    </button>
+                </div>
+
             </div>
         </div>
 
-        <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
-            <button id="downloadExcelBtn"
-                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75">
-                Download Excel
+        <!-- ACTION BAR -->
+        <div class="flex justify-between items-center mt-3 mb-3 flex-wrap gap-2">
+            <button id="downloadExcelBtn" class="gov-download-btn">
+                ⬇ Download Excel
             </button>
-
         </div>
 
+        <!-- MESSAGE -->
         <center>
-            <span class="text-success h1" id="msg"></span>
-            <span class="text-danger h1" id="errormsg"></span>
+            <span class="text-success h5" id="msg"></span>
+            <span class="text-danger h5" id="errormsg"></span>
         </center>
+        
+        <div class="table-container">
 
-        <div class="table-container bg-white rounded-lg overflow-hidden shadow-md overflow-x-auto">
-            <table id="meetingTable" class="min-w-full divide-y divide-gray-200 table-fixed-header">
+            <!-- <div class="table-container bg-white rounded-lg overflow-hidden shadow-md overflow-x-auto"> -->
+
+            <table id="meetingTable" class="table table-bordered table-sm">
+                <!-- <table id="meetingTable" class="min-w-full divide-y divide-gray-200 table-fixed-header"> -->
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="py-3 px-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
